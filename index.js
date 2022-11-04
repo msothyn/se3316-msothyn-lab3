@@ -24,7 +24,7 @@ fs.createReadStream("./lab3-data/raw_albums.csv")
   )
   .on("data", function (row) {
     // push the object row into the array
-    data.push(row);
+    albumArr.push(row);
   })
   .on("error", function (error) {
     console.log(error.message);
@@ -42,7 +42,7 @@ fs.createReadStream("./lab3-data/raw_albums.csv")
   )
   .on("data", function (row) {
     // push the object row into the array
-    data.push(row);
+    artistsArr.push(row);
   })
   .on("error", function (error) {
     console.log(error.message);
@@ -60,7 +60,7 @@ fs.createReadStream("./lab3-data/raw_albums.csv")
   )
   .on("data", function (row) {
     // push the object row into the array
-    data.push(row);
+    tracksArr.push(row);
   })
   .on("error", function (error) {
     console.log(error.message);
@@ -79,7 +79,7 @@ fs.createReadStream("./lab3-data/raw_albums.csv")
   )
   .on("data", function (row) {
     // push the object row into the array
-    data.push(row);
+    genreArr.push(row);
   })
   .on("error", function (error) {
     console.log(error.message);
@@ -90,10 +90,30 @@ fs.createReadStream("./lab3-data/raw_albums.csv")
 // Setup serving front end code 
 app.use('/', express.static('static'));
 
-app.get('/',(req,res) => {
-    res.send('Hello World!');
+// Given artist ID return 6 key attributes 
+app.get('/api/artists/:artist_id' , (req, res) => {
+    const id = req.params.artist_id;
+    console.log(`GET request for ${req.url}`);
+    const artist = artistsArr.find(p => parseInt(p.artist_id) === parseInt(id));
+
+    if(artist){
+        res.send({name: artist.artist_name, year: artist.artist_active_year_begin,date: artist.artist_date_created, favourites: artist.artist_favorites, tags: artist.tags,handle: artist.artist_handle});
+    }
+    else{
+        res.status(404).send(`Artist ${id} was not found!`)
+       
+    }
+    
+});
+
+
+
+app.get('/genre',(req,res) => {
+    res.send(genreArr);
 }); 
 
 app.listen(port,() => {
     console.log(`Listening on port ${port}`);   
 });
+
+
