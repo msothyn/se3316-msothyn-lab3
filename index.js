@@ -153,6 +153,7 @@ app.get('/api/trackTitle/:track_name', (req, res) => {
 
 });
 
+//Get all available genre names, IDs and parent IDs. 
 app.get('/genre',(req,res)=>{
     let matchedGenreArr = [];
 
@@ -161,6 +162,25 @@ app.get('/genre',(req,res)=>{
     }
     res.send(matchedGenreArr);
     
+});
+
+// Get all the matching artist IDs for a given search pattern matching the artist's name.
+app.get('/api/artistID/:test', (req, res) => {
+    const artistName = req.params.test;
+    let matchedArtistArr = [];
+    for (let i = 0; i < artistsArr.length; i++) {
+        let artist = artistsArr[i].artist_name.toLowerCase();
+        if (artist.match(artistName.toLowerCase())) {
+            matchedArtistArr.push({ artistId: artistsArr[i].artist_id})
+        }
+    }
+    if(matchedArtistArr.length >= 1){
+         res.send(matchedArtistArr);
+    }
+    else{
+        res.status(404).send(`Artist ID for artist name ${artistName} was not found!`);
+    }
+
 });
 
 
