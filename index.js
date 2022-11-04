@@ -153,13 +153,21 @@ app.get('/api/trackTitle/:track_name', (req, res) => {
 
 });
 
+app.get('/genre',(req,res)=>{
+    let matchedGenreArr = [];
 
-
-
-
-app.get('/genre', (req, res) => {
-    res.send(genreArr);
+    for (let i = 0; i < genreArr.length; i++){
+        matchedGenreArr.push({genreID: genreArr[i].genre_id, parent: genreArr[i].parent, title: genreArr[i].title});  
+    }
+    res.send(matchedGenreArr);
+    
 });
+
+
+
+
+
+
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
