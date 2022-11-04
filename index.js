@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 3000; 
+const port = 3000;
 
 // Import fs and csv-parse 
 const fs = require("fs");
@@ -15,105 +15,154 @@ const tracksArr = [];
 
 // Parse albums
 fs.createReadStream("./lab3-data/raw_albums.csv")
-  .pipe(
-    parse({
-      delimiter: ",",
-      columns: true,
-      ltrim: true,
+    .pipe(
+        parse({
+            delimiter: ",",
+            columns: true,
+            ltrim: true,
+        })
+    )
+    .on("data", function (row) {
+        // push the object row into the array
+        albumArr.push(row);
     })
-  )
-  .on("data", function (row) {
-    // push the object row into the array
-    albumArr.push(row);
-  })
-  .on("error", function (error) {
-    console.log(error.message);
-  });
-  
+    .on("error", function (error) {
+        console.log(error.message);
+    });
 
-  // Parse artists
-  fs.createReadStream("./lab3-data/raw_artists.csv")
-  .pipe(
-    parse({
-      delimiter: ",",
-      columns: true,
-      ltrim: true,
+
+// Parse artists
+fs.createReadStream("./lab3-data/raw_artists.csv")
+    .pipe(
+        parse({
+            delimiter: ",",
+            columns: true,
+            ltrim: true,
+        })
+    )
+    .on("data", function (row) {
+        // push the object row into the array
+        artistsArr.push(row);
     })
-  )
-  .on("data", function (row) {
-    // push the object row into the array
-    artistsArr.push(row);
-  })
-  .on("error", function (error) {
-    console.log(error.message);
-  });
- 
+    .on("error", function (error) {
+        console.log(error.message);
+    });
 
-  // Parse tracks
-  fs.createReadStream("./lab3-data/raw_tracks.csv")
-  .pipe(
-    parse({
-      delimiter: ",",
-      columns: true,
-      ltrim: true,
+
+// Parse tracks
+fs.createReadStream("./lab3-data/raw_tracks.csv")
+    .pipe(
+        parse({
+            delimiter: ",",
+            columns: true,
+            ltrim: true,
+        })
+    )
+    .on("data", function (row) {
+        // push the object row into the array
+        tracksArr.push(row);
     })
-  )
-  .on("data", function (row) {
-    // push the object row into the array
-    tracksArr.push(row);
-  })
-  .on("error", function (error) {
-    console.log(error.message);
-  });   
-  
+    .on("error", function (error) {
+        console.log(error.message);
+    });
 
 
-  // Parse genres
-  fs.createReadStream("./lab3-data/genres.csv")
-  .pipe(
-    parse({
-      delimiter: ",",
-      columns: true,
-      ltrim: true,
+
+// Parse genres
+fs.createReadStream("./lab3-data/genres.csv")
+    .pipe(
+        parse({
+            delimiter: ",",
+            columns: true,
+            ltrim: true,
+        })
+    )
+    .on("data", function (row) {
+        // push the object row into the array
+        genreArr.push(row);
     })
-  )
-  .on("data", function (row) {
-    // push the object row into the array
-    genreArr.push(row);
-  })
-  .on("error", function (error) {
-    console.log(error.message);
-  });
+    .on("error", function (error) {
+        console.log(error.message);
+    });
 
 
- 
+
 // Setup serving front end code 
 app.use('/', express.static('static'));
+app.use((req, res, next) => {
+    console.log(`${req.method} request for ${req.url}`)
+    next()
+})
 
 // Given artist ID return 6 key attributes 
-app.get('/api/artists/:artist_id' , (req, res) => {
+app.get('/api/artists/:artist_id', (req, res) => {
     const id = req.params.artist_id;
-    console.log(`GET request for ${req.url}`);
     const artist = artistsArr.find(p => parseInt(p.artist_id) === parseInt(id));
 
-    if(artist){
-        res.send({name: artist.artist_name, year: artist.artist_active_year_begin,date: artist.artist_date_created, favourites: artist.artist_favorites, tags: artist.tags,handle: artist.artist_handle});
+    if (artist) {
+        res.send({ name: artist.artist_name, year: artist.artist_active_year_begin, date: artist.artist_date_created, favourites: artist.artist_favorites, tags: artist.tags, handle: artist.artist_handle });
+    }
+    else {
+        res.status(404).send(`Artist ${id} was not found!`)
+
+    }
+
+});
+
+//album_id, album_title, artist_id, artist_name, tags, track_date_created, track_date_recorded, track_duration, track_genres, track_number, track_title 
+app.get('/api/tracks/:track_id', (req, res) => {
+    const id = req.params.track_id;
+    const track = tracksArr.find(p => parseInt(p.track_id) === parseInt(id));
+
+    if (track) {
+        res.send({ albumId: track.album_id, title: track.album_title, artistId: track.artist_id, artistName: track.artist_name, tags: track.tags, trackDateCreated: track.track_date_created, trackDuration: track.track_duration, trackGenre: track.track_genres, trackNumber: track.track_number, trackTitle: track.track_title });
+    }
+    else {
+        res.status(404).send(`Artist ${id} was not found!`)
+
+    }
+
+});
+
+//Get the first n number of matching track IDs for a given search pattern matching the track title or album. 
+//If the number of matches is less than n, then return all matches. 
+app.get('/api/trackTitle/:track_name', (req, res) => {
+    const title = req.params.track_name;
+    let n = 0;
+    let matchedArr = [];
+
+    for (let i = 0; i < tracksArr.length; i++) {
+        const trackName = tracksArr[i].track_title.toLowerCase();
+        const albumName = tracksArr[i].album_title.toLowerCase();
+
+        if (trackName.match(title.toLowerCase()) || albumName.match(title.toLowerCase())) {
+            matchedArr.push({ trackId: tracksArr[i].track_id })
+            n++;
+        }
+
+        if (n == 5) {
+            break;
+        }
+    }
+    if(matchedArr.length >= 1){
+         res.send(matchedArr);
     }
     else{
-        res.status(404).send(`Artist ${id} was not found!`)
-       
+        res.status(404).send(`Track Id ${title} was not found!`);
     }
-    
+
 });
 
 
 
-app.get('/genre',(req,res) => {
-    res.send(genreArr);
-}); 
 
-app.listen(port,() => {
-    console.log(`Listening on port ${port}`);   
+
+app.get('/genre', (req, res) => {
+    res.send(genreArr);
+});
+
+app.listen(port, () => {
+    console.log(`Listening on port ${port}`);
 });
 
 
