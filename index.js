@@ -11,6 +11,7 @@ const albumArr = [];
 const genreArr = [];
 const artistsArr = [];
 const tracksArr = [];
+const listArr = [];
 
 
 // Parse albums
@@ -93,6 +94,9 @@ app.use((req, res, next) => {
     console.log(`${req.method} request for ${req.url}`)
     next()
 })
+
+//Parse data & body as json 
+app.use(express.json());
 
 // Given artist ID return 6 key attributes 
 app.get('/api/artists/:artist_id', (req, res) => {
@@ -183,10 +187,19 @@ app.get('/api/artistID/:test', (req, res) => {
 
 });
 
+// Create a new list to save a list of tracks with a given list name. Return an error if name exists. 
+app.put('/api/newList/:lName', (req, res) => {
+    const newList = req.params.lName;
+    const list = listArr.findIndex(p => p.newList === newList )
 
-
-
-
+    if(list<0){
+        listArr.push({newList: newList});
+        res.send(listArr);
+    }
+    else{
+        res.status(404).send(`The list ${newList} already exists!`);
+    }
+});
 
 
 app.listen(port, () => {
