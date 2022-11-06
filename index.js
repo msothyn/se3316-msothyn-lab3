@@ -122,7 +122,7 @@ app.get('/api/tracks/:track_id', (req, res) => {
         res.send({ albumId: track.album_id, title: track.album_title, artistId: track.artist_id, artistName: track.artist_name, tags: track.tags, trackDateCreated: track.track_date_created, trackDuration: track.track_duration, trackGenre: track.track_genres, trackNumber: track.track_number, trackTitle: track.track_title });
     }
     else {
-        res.status(404).send(`Artist ${id} was not found!`)
+        res.status(404).send(`Track ${id} was not found!`)
 
     }
 
@@ -148,40 +148,42 @@ app.get('/api/trackTitle/:track_name', (req, res) => {
             break;
         }
     }
-    if(matchedArr.length >= 1){
-         res.send(matchedArr);
+    if (matchedArr.length >= 1) {
+        res.send(matchedArr);
     }
-    else{
+    else {
         res.status(404).send(`Track Id ${title} was not found!`);
     }
 
 });
 
 //Get all available genre names, IDs and parent IDs. 
-app.get('/genre',(req,res)=>{
+app.get('/genre', (req, res) => {
     let matchedGenreArr = [];
 
-    for (let i = 0; i < genreArr.length; i++){
-        matchedGenreArr.push({genreID: genreArr[i].genre_id, parent: genreArr[i].parent, title: genreArr[i].title});  
+   
+    for (let i = 0; i < genreArr.length; i++) {
+        matchedGenreArr.push({ genreID: genreArr[i].genre_id, parent: genreArr[i].parent, title: genreArr[i].title });
     }
     res.send(matchedGenreArr);
-    
+
 });
 
 // Get all the matching artist IDs for a given search pattern matching the artist's name.
 app.get('/api/artistID/:test', (req, res) => {
     const artistName = req.params.test;
     let matchedArtistArr = [];
+ 
     for (let i = 0; i < artistsArr.length; i++) {
         let artist = artistsArr[i].artist_name.toLowerCase();
         if (artist.match(artistName.toLowerCase())) {
-            matchedArtistArr.push({ artistId: artistsArr[i].artist_id})
+            matchedArtistArr.push({ artistId: artistsArr[i].artist_id })
         }
     }
-    if(matchedArtistArr.length >= 1){
-         res.send(matchedArtistArr);
+    if (matchedArtistArr.length >= 1) {
+        res.send(matchedArtistArr);
     }
-    else{
+    else {
         res.status(404).send(`Artist ID for artist name ${artistName} was not found!`);
     }
 
@@ -190,15 +192,111 @@ app.get('/api/artistID/:test', (req, res) => {
 // Create a new list to save a list of tracks with a given list name. Return an error if name exists. 
 app.put('/api/newList/:lName', (req, res) => {
     const newList = req.params.lName;
-    const list = listArr.findIndex(p => p.newList === newList )
+    const list = listArr.findIndex(p => p.newList === newList)
 
-    if(list<0){
-        listArr.push({newList: newList});
+    if (list < 0) {
+        listArr.push({ newList: newList });
         res.send(listArr);
     }
-    else{
+    else {
         res.status(404).send(`The list ${newList} already exists!`);
     }
+});
+
+// step 7
+app.put('/api/list/:listName', (req, res) => {
+    const playlistName = req.params.listName;
+    const addTrack = req.body;
+    let addTrack2 = addTrack.tracks.split(",");
+
+    
+    for (let n = 0; n < addTrack2.length; n++) {
+        if (tracksArr.findIndex(p => p.track_id === addTrack2[n]) == -1) {
+            addTrack2.splice(n, 1);
+        }
+    }
+
+    if (listArr.findIndex(p => p.newList.toLowerCase() == playlistName.toLowerCase()) >= 0) {
+        const playlist = listArr.findIndex(p => p.newList.toLowerCase() == playlistName.toLowerCase());
+        listArr[playlist].tracks = addTrack2;
+        res.send(listArr[playlist]);
+    }
+    else {
+        res.status(404).send(`The playlist ${playlistName} does not exist!`);
+    }
+});
+
+// step 8
+app.get('/api/list/:playlistName', (req, res) => {
+    const name = req.params.playlistName;
+    const tracklist = [];
+    if (listArr.findIndex(p => p.newList.toLowerCase() == name.toLowerCase()) >= 0) {
+        const playlist = listArr.findIndex(p => p.newList.toLowerCase() == name.toLowerCase());
+        tracklist.push(listArr[playlist]);
+        res.send(tracklist)
+    }
+    else {
+        res.status(404).send(`The playlist ${name} does not exist!`);
+    }
+
+})
+
+// Delete a list of tracks with a given name. Return an error if the given list doesn’t exist. [5 points] → delete
+app.delete('/api/deleteList/:playlistName', (req, res) => {
+    const name = req.params.playlistName;
+
+    if (listArr.findIndex(p => p.newList.toLowerCase() == name.toLowerCase()) >= 0) {
+        const playlist = listArr.findIndex(p => p.newList.toLowerCase() == name.toLowerCase());
+        listArr.splice(playlist, 1);
+        res.send(`The playlist ${name} has been deleted!`);
+    }
+
+    else {
+        res.status(404).send(`The playlist ${name} does not exist!`);
+    }
+
+})
+
+//Get a list of list names, number of tracks that are saved in each list and the total play time of each list
+app.get('/api/getPlaylist', (req, res) => {
+    let allPlaylistArr = [];
+    const tracklist = [];
+    let duration = 0;
+    let finalDur = 0;
+    let minutes = 0;
+    let seconds = 0;
+    let dur = 0;
+    let numOfTracks = 0;
+
+
+    for (let i = 0; i < listArr.length; i++) {
+        tracklist.push(listArr[i]);
+
+        if (listArr[i].tracks != undefined) {
+            for (let n = 0; n < listArr[i].tracks.length; n++) {
+                let track = tracksArr.find(p => p.track_id == listArr[i].tracks[n]);
+                numOfTracks = listArr[i].tracks.length;
+                if (track) {
+                    console.log(track.track_duration)
+                    duration = track.track_duration;
+                    let splitDur = duration.split(":");
+                    let durSec = (+splitDur[0]) * 60 + (+splitDur[1]);
+                    dur += durSec;
+                    minutes = Math.floor(dur / 60);
+                    seconds = dur - minutes * 60;
+                    finalDur = minutes + ":" + seconds;
+
+                }
+            }
+        }
+        else {
+            numOfTracks = 0;
+            finalDur = "00:00";
+        }
+        allPlaylistArr.push({ playlistName: listArr[i].newList, numberOfTracks: numOfTracks, duration: finalDur });
+
+    }
+    res.send(allPlaylistArr);
 });
 
 
