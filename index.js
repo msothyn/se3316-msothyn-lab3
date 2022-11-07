@@ -284,6 +284,9 @@ app.get('/api/getPlaylist', (req, res) => {
                     dur += durSec;
                     minutes = Math.floor(dur / 60);
                     seconds = dur - minutes * 60;
+                    if(seconds < 10){
+                        seconds = "0"+seconds;
+                    }
                     finalDur = minutes + ":" + seconds;
 
                 }
