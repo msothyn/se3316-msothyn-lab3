@@ -211,8 +211,9 @@ app.put('/api/list/:listName', (req, res) => {
 
     
     for (let n = 0; n < addTrack2.length; n++) {
-        if (tracksArr.findIndex(p => p.track_id === addTrack2[n]) == -1) {
+        if (tracksArr.findIndex(p => p.track_id=== addTrack2[n]) == -1) {
             addTrack2.splice(n, 1);
+            n--;
         }
     }
 
@@ -233,7 +234,7 @@ app.get('/api/list/:playlistName', (req, res) => {
     if (listArr.findIndex(p => p.newList.toLowerCase() == name.toLowerCase()) >= 0) {
         const playlist = listArr.findIndex(p => p.newList.toLowerCase() == name.toLowerCase());
         tracklist.push(listArr[playlist]);
-        res.send(tracklist)
+        res.send(tracklist[0].tracks)
     }
     else {
         res.status(404).send(`The playlist ${name} does not exist!`);

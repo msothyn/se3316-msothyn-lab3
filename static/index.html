@@ -1,13 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Music Store</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    
+    <h1>Music Browser</h1>
+    <span>
+        <div class="Search">
+            <input maxlength="12" id="trackSearch" type="text" placeholder="Search by album name or track name..">
+            <button id="trackAlbum">Go!</button>
+        </div>
+    </span>
+    <span id="track-status"></span>
+    <ul id="track-list"></ul>
+
+    <span>
+        <div class="Search">
+            <input maxlength="12" id="artistSearch" type="text" placeholder="Search by artist name..">
+            <button id="artist-name">Go!</button>
+        </div>
+    </span>
+    <span id="artist-status"></span>
+    <ol id="artist-list"></ol>
+
+    <span>
+        <div class="playlist">
+            <input maxlength="12" id="createPlaylist" type="text" placeholder="Create a playlist..">
+            <button id="playlist">Go!</button>
+        </div>
+    </span>
+    <span id="playlist-status"></span>
+    <ol id="playlist-list"></ol>
+
+    <span>
+        <div class="delete">
+            <input maxlength="12" id="delete" type="text" placeholder="Delete a playlist..">
+            <button id="deletePlaylist">Go!</button>
+        </div>
+    </span>
+    <span id="delete-status"></span>
+    <ol></ol>
+
+    <span>
+        <div class="addTracks">
+            <input maxlength="12" id="choosePlaylist" type="text" placeholder="Choose a playlist to add tracks to..">
+            <input maxlength="20" id="addTrack" type="text" placeholder="Add track IDs to your playlist..">
+            <button id="add">Go!</button>
+        </div>
+    </span>
+    <span id="addtrack-status"></span>
+    <ul id="trackList"></ul>
+
+    <span>
+        <div>
+            <h1>Music is available in the following genres:</h1>
+            <ol id="genres"></ol>
+        </div>
+    </span>
+
+    <script src="script.js"></script>
 </body>
+
 </html>

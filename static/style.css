@@ -1,0 +1,36 @@
+#track-list{
+display: grid;
+grid-template-columns: auto auto auto auto;
+list-style-type: none;
+}
+
+#trackList {
+    list-style-type: none
+}
+
+#genres{
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+}
+
+#artist-list {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+html{
+    background-color: lightblue;
+}
+
+.bold{
+    font-weight: bold;
+    padding-bottom: 0.25cm ;
+}
+
+#unbold {
+    font-weight: normal;
+}
+
+input{
+    width:10cm;
+}
